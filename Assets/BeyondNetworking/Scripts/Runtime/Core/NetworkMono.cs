@@ -4,18 +4,14 @@ using UnityEngine;
 
 namespace Beyond.Networking
 {
-    public class BeyondMono : MonoBehaviour
+    public class NetworkMono : MonoBehaviour
     {
-        public Server Server {
-            get; set;
-        } = new("BEYONDSERVER");
-
-        public Client Client {
-            get; set;
-        } = new("BEYONDCLIENT");
-
+        public Server Server;
+        public Client Client;
         private void Start() {
             DontDestroyOnLoad(this);
+            Server = new();
+            Client = new();
             RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, false);
         }
 

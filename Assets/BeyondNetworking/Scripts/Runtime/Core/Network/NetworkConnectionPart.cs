@@ -6,25 +6,21 @@ using UnityEngine;
 
 namespace Beyond.Networking
 {
-    public static partial class BeyondNetwork
+    public static partial class Network
     {
         public static ServerData CurrentServer;
-        public static void CreateServer(string name, string[] properties, ushort maxClients = 0, bool asHost = true, ushort port = 7777) {          
-            if (maxClients < 1)
-                maxClients = BeyondSettings.Settings.MaxClients;
-            if (name.Length < 1)
-                name = $"{BeyondSettings.Settings.ServerName}{BeyondSettings.Settings.ServerName.GetHashCode()}";
-            Mono.Server.Start(port, maxClients);
+        public static void CreateServer(string name, string[] properties, ushort maxClients = 10, bool asHost = true, ushort port = 7777) {          
+            Mono?.Server?.Start(port, maxClients);
             CurrentServer = new ServerData(name, maxClients, properties);
             if (asHost)
                 JoinServer("127.0.0.1", 7777);
         }
         public static ClientRef LocalClient;
-        public static void JoinServer(string address) {
+        public static void JoinServer(string address, int connectionAttempts) {
             Message connectMessage = Message.Create();
             connectMessage.AddString(NickName);
             connectMessage.AddString(UserId);
-            Mono.Client.Connect(address, BeyondSettings.Settings.MaxConnectionAttempts, 0, connectMessage);
+            Mono.Client.Connect(address, connectionAttempts, 0, connectMessage);
         }
         public static string NickName;
         public static string UserId;

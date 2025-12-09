@@ -7,20 +7,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55c0ebe1af3247744ad1095725221445, type: 3}
-  m_Name: Beyond Settings
+  m_Script: {fileID: 11500000, guid: 7c8cfa41209f89e40a37c0dd6aa55384, type: 3}
+  m_Name: Network Settings
   m_EditorClassIdentifier: 
   MaxMessagePayloadSize: 65535
-  MaxMessagePoolSize: 4
-  MaxConnectionAttempts: 5
-  MaxClients: 10
-  ServerName: Server
   PublishUserIds: 0
-  Prefabs:
-  - Key: 
-    Prefab: {fileID: 0}
-  Rpcs:
-  - TypeName: 
-    MethodName: 
+  _prefabs:
+  - Key: Ball
+    Prefab: {fileID: 5319911287248938347, guid: 4979fd21a76e6374b9b44e929d488552, type: 3}

@@ -1,21 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-namespace Beyond.Networking
-{
-    public static partial class BeyondNetwork
+using UnityEngine.SceneManagement;
+namespace Beyond.Networking {
+    public static partial class Network
     {
-        public static BeyondMono Mono;
-        static BeyondNetwork() {
-            var settings = Resources.Load<BeyondSettings>("Beyond Settings");
-            if (!Application.IsPlaying(settings) || settings == null)
-                return;
+        public static NetworkMono Mono;
+        public static Dictionary<string, GameObject> Prefabs = new();
+        static Network() {
+            var settings = Resources.Load<NetworkSettings>(NetworkSettings.SETTINGSPATH);     
+            settings.Start();
             NickName = PlayerPrefs.GetString("NICKNAME", $"Player{Random.Range(1000, 9999)}");
             UserId = Application.buildGUID;
-            BeyondSettings.Settings = settings;
-            Mono = new GameObject("Beyond Mono").AddComponent<BeyondMono>();
+            if (!Application.IsPlaying(settings))
+                return;
+            Mono = new GameObject("Beyond Mono").AddComponent<NetworkMono>();
             Mono.Server.ClientDisconnected += Server_ClientDisconnected;
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private static void Server_ClientDisconnected(object sender, Riptide.ServerDisconnectedEventArgs e) {

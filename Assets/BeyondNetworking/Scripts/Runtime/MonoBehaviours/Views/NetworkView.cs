@@ -1,25 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Riptide;
 
 namespace Beyond.Networking
 {
     public class NetworkView : MonoBehaviour
     {
-        public MessageSendMode Reliability = MessageSendMode.Unreliable;
-        public bool SharedOwnership = true;
-        public uint SceneId = 0;
-        public uint InstantiationId = 0;
-        public uint ViewId = 0;
-        public ClientRef Owner = new();
-        public bool IsMine => Owner.GetConnection() == BeyondNetwork.Mono.Client.Connection;
-        public IObservable[] Observables = new();
+        public bool SharedOwnership = false;
+        public int SceneId = 0;
+        public int InstantiationId { get; internal set; } = 0;
+        public int ViewId { get; internal set; } = 0;
+        public ClientRef Owner { get; internal set; } = new();
+        public bool IsMine => Owner.GetConnection() == Network.Mono.Client.Connection;
+        public IObservable[] Observables;
         
-        public void RPC(IObservable component, string methodName, RpcTarget target, bool buffered = false, params object[] parameters = null){
-        
+        public void RPC(IObservable component, string methodName, RpcTarget target, bool buffered = false, MessageSendMode sendMode = MessageSendMode.Unreliable, params object[] parameters){
+            
         }
 
-        public void RPC(IObservable component, string methodName, ClientRef player, params object[] parameters = null){
+        public void RPC(IObservable component, string methodName, ClientRef player, MessageSendMode sendMode = MessageSendMode.Unreliable, params object[] parameters){
         
         }
         
@@ -32,6 +32,9 @@ namespace Beyond.Networking
         }
         public void TransferOwnership(uint newActorNumber){
         
+        }
+
+        private void Start() {
         }
     }
 
