@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Beyond.Networking
 {
+    [Serializable]
     public struct ClientRef : IMessageSerializable {
         public Connection GetConnection() {
             if (!BeyondNetwork.Mono.Server.IsRunning) {
