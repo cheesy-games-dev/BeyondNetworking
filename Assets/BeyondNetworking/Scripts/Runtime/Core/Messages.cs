@@ -6,5 +6,10 @@ namespace Beyond.Networking
 {
     public enum Messages : ushort {
         ServerDataMessage,
+        ObjectSpawnMessage,
+        ObjectDestroyMessage,
+        RpcMessage,
+        SyncDataMessage,
+        ChangeSceneMessage,
     }
 }
