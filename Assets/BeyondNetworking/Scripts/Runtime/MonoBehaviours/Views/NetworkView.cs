@@ -19,7 +19,7 @@ namespace Beyond.Networking
         
         }
 
-        public void RPC(Component component, string methodName, ClientRef player, rams object[] parameters = null){
+        public void RPC(Component component, string methodName, ClientRef player, params object[] parameters = null){
         
         }
         
