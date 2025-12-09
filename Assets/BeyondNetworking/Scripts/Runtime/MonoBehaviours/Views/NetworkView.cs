@@ -6,13 +6,14 @@ namespace Beyond.Networking
 {
     public class NetworkView : MonoBehaviour
     {
-        public MessageSendMode Reliability;
-        public uint SceneId;
-        public uint InstantiationId;
-        public uint ViewId;
-        public ClientRef Owner;
+        public MessageSendMode Reliability = MessageSendMode.Unreliable;
+        public bool SharedOwnership = true;
+        public uint SceneId = 0;
+        public uint InstantiationId = 0;
+        public uint ViewId = 0;
+        public ClientRef Owner = new();
         public bool IsMine => Owner.GetConnection() == BeyondNetwork.Mono.Client.Connection;
-        public List</*IObservable (add it)*/> Observables;
+        public IObservable[] Observables = new();
         
         public void RPC(Component component, string methodName, RpcTarget target, bool buffered = false, params object[] parameters = null){
         
