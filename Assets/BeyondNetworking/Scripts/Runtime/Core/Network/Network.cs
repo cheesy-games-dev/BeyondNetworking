@@ -8,12 +8,17 @@ namespace Beyond.Networking {
         public static NetworkMono Mono;
         public static Dictionary<string, GameObject> Prefabs = new();
         static Network() {
-            var settings = Resources.Load<NetworkSettings>(NetworkSettings.SETTINGSPATH);     
+            StartNetwork();
+        }
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void StartNetwork() {
+            var settings = Resources.Load<NetworkSettings>(NetworkSettings.SETTINGSPATH);
             settings.Start();
-            NickName = PlayerPrefs.GetString("NICKNAME", $"Player{Random.Range(1000, 9999)}");
-            UserId = Application.buildGUID;
             if (!Application.IsPlaying(settings))
                 return;
+            NickName = PlayerPrefs.GetString("NICKNAME", $"Player{Random.Range(1000, 9999)}");
+            UserId = Application.buildGUID;
             Mono = new GameObject("Beyond Mono").AddComponent<NetworkMono>();
             Mono.Server.ClientDisconnected += Server_ClientDisconnected;
             SceneManager.sceneLoaded += OnSceneLoaded;

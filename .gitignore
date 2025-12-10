@@ -75,3 +75,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 /TEST
 /TEST
+/TEST/BeyondNetworking_Data
+/TEST
+/TEST/BeyondNetworking_Data/Managed

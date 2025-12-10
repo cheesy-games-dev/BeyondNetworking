@@ -9,24 +9,22 @@ namespace Beyond.Networking
     public static partial class Network
     {
         public static ServerData CurrentServer;
-        public static void CreateServer(string name, string[] properties, ushort maxClients = 10, bool asHost = true, ushort port = 7777) {          
-            Mono?.Server?.Start(port, maxClients);
-            CurrentServer = new ServerData(name, maxClients, properties);
-            if (asHost)
-                JoinServer("127.0.0.1", 7777);
+        public static void InitializeServer(ushort connections, ushort listenPort = 25000, string name = "SERVER", string[] properties = null) {
+            if (name == "SERVER")
+                name += Guid.NewGuid().GetHashCode().ToString();
+            Mono.Server.Start(listenPort, connections);
+            CurrentServer = new ServerData(name, connections, properties);
         }
         public static ClientRef LocalClient;
-        public static void JoinServer(string address, int connectionAttempts) {
+        public static void Connect(string address, ushort remotePort = 25000, int connectionAttempts = 5) {
             Message connectMessage = Message.Create();
             connectMessage.AddString(NickName);
             connectMessage.AddString(UserId);
-            Mono.Client.Connect(address, connectionAttempts, 0, connectMessage);
+            if (!Mono.Client.Connect(address, connectionAttempts, 0, connectMessage))
+                Mono.Client.Connect(address + $":{remotePort}", connectionAttempts, 0, connectMessage);
         }
         public static string NickName;
         public static string UserId;
-        public static void JoinServer(string address, ushort port = 7777) {
-            JoinServer($"{address}:{port}");
-        }
 
         [MessageHandler((ushort)MessageHeader.Connect)]
         internal static void ConnectedHandler(ushort fromClientId, Message message) {
@@ -58,9 +56,7 @@ namespace Beyond.Networking
         public string Name;
         public uint MaxClients;
         public List<ClientRef> Clients;
-        public string[] CustomProperties {
-            get; set;
-        }
+        public string[] CustomProperties;
 
         public ServerData(string name, uint maxClients, string[] properties) {
             Name = name;

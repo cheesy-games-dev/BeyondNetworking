@@ -36,12 +36,12 @@ public class NetworkGUI : MonoBehaviour
                 Network.Instantiate(selectedSpawnable);
             }
         }
-        if (GUILayout.Button("Create Server")) {
+        if (GUILayout.Button("Init Server")) {
             var properties = new string[3];
             properties[0] = "Balls";
             properties[1] = "Squares";
             properties[2] = "CUSTOM";
-            Beyond.Networking.Network.CreateServer("Server", properties);
+            Beyond.Networking.Network.InitializeServer(10, name: "Server", properties: properties);
         }
         
         GUILayout.Box("Client");
@@ -49,7 +49,7 @@ public class NetworkGUI : MonoBehaviour
         Beyond.Networking.Network.UserId = GUILayout.TextField(Beyond.Networking.Network.UserId);
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Join Server")) {
-            Beyond.Networking.Network.JoinServer(address);
+            Beyond.Networking.Network.Connect(address, 25000);
         }
         address = GUILayout.TextField(address);
         GUILayout.EndHorizontal();
