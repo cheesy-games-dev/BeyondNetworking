@@ -1,3 +1,4 @@
+using Riptide;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,8 +12,10 @@ namespace Beyond.Networking {
         public static NetworkSettings Settings {
             get; internal set;
         }
-        public static bool isHost => Mono.Server.IsRunning;
-        public static bool isConnected => Mono.Client.IsConnected;
+        public static bool isHost => Server.IsRunning;
+        public static bool isConnected => Client.IsConnected;
+        public static Server Server => Mono.Server;
+        public static Client Client => Mono.Client;
         public static Dictionary<string, GameObject> Prefabs = new();
         static Network() {
             StartNetwork();
@@ -27,11 +30,9 @@ namespace Beyond.Networking {
             NickName = PlayerPrefs.GetString("NICKNAME", $"Player{Random.Range(1000, 9999)}");
             UserId = Application.buildGUID;
             Mono = new GameObject("Beyond Mono").AddComponent<NetworkMono>();
-            Mono.Server.ClientDisconnected += Server_ClientDisconnected;
         }
 
-        private static void Server_ClientDisconnected(object sender, Riptide.ServerDisconnectedEventArgs e) {
-            CurrentServer.Clients.Remove(CurrentServer.Clients.Find(x => x.GetConnection() == e.Client));
+        internal static void Server_ClientDisconnected(object sender, Riptide.ServerDisconnectedEventArgs e) {
             UpdateServerData();
         }
     }

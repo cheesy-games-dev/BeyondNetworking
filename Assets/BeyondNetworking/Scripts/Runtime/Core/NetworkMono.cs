@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 namespace Beyond.Networking
 {
     [DefaultExecutionOrder(-ushort.MaxValue)]
-    public class NetworkMono : ObservableBehaviour
+    public class NetworkMono : MonoBehaviour
     {
         public Server Server;
         public Client Client;
@@ -16,8 +16,12 @@ namespace Beyond.Networking
             DontDestroyOnLoad(this);
             Server = new();
             Client = new();
-            SceneManager.sceneLoaded += Network.OnSceneLoaded;
             RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, false);
+        }
+
+        private void Start() {
+            SceneManager.sceneLoaded += Network.OnSceneLoaded;
+            Server.ClientDisconnected += Network.Server_ClientDisconnected;
             Network.AllocateSceneViews();
         }
 

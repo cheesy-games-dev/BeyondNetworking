@@ -16,7 +16,6 @@ namespace Beyond.Networking
             Connect("127.0.0.1", listenPort);
             CurrentServer = new ServerData(name, connections, properties);
         }
-        public static ClientRef LocalClient;
         public static void Connect(string address, ushort remotePort = 25000, int connectionAttempts = 5) {
             Message connectMessage = Message.Create();
             connectMessage.AddString(NickName);
@@ -29,12 +28,6 @@ namespace Beyond.Networking
 
         [MessageHandler((ushort)MessageHeader.Connect)]
         internal static void ConnectedHandler(ushort fromClientId, Message message) {
-            ClientRef newClientRef = new();
-            newClientRef.Nickname = message.GetString();
-            newClientRef.UserId = message.GetString();
-            newClientRef.ActorNumber = fromClientId;
-            newClientRef.IsHost = newClientRef.GetConnection() == Mono.Client.Connection;
-            CurrentServer.Clients.Add(newClientRef);
             UpdateServerData();
         }
 
@@ -56,28 +49,24 @@ namespace Beyond.Networking
     public struct ServerData : IMessageSerializable {
         public string Name;
         public uint MaxClients;
-        public List<ClientRef> Clients;
         public string[] CustomProperties;
 
         public ServerData(string name, uint maxClients, string[] properties) {
             Name = name;
             MaxClients = maxClients;
             CustomProperties = properties;
-            Clients = new List<ClientRef>();
         }
 
         public void Serialize(Message message) {
-            message.AddString(Name);
-            message.AddUInt(MaxClients);
-            message.AddStrings(CustomProperties);
-            message.AddString(JsonUtility.ToJson(CustomProperties));
+            message.Add(Name);
+            message.Add(MaxClients);
+            message.Add(CustomProperties);
         }
 
         public void Deserialize(Message message) {
             Name = message.GetString();
             MaxClients = message.GetUInt();
             CustomProperties = message.GetStrings();
-            Clients = JsonUtility.FromJson<List<ClientRef>>(message.GetString());
         }
     }
 }

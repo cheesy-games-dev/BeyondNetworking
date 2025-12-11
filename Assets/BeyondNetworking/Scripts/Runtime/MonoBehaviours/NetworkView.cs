@@ -18,29 +18,43 @@ namespace Beyond.Networking
             get; internal set; 
         } = -1;
         public int ViewId { get; internal set; } = 0;
-        public ClientRef Owner { get; internal set; } = new();
-        public bool IsMine => Owner.GetConnection() == Network.Mono.Client.Connection;
+        public ushort Owner { get; internal set; } = 0;
+        public bool IsMine {
+            get{
+                if (Network.Client.Connection != null)
+                    return Owner == Network.Client.Id;
+                else
+                    return true;
+            }
+        }
 
         public event Action<string, Message> PayloadReceived;
 
-        public void SendPayload(string header, Message payload, MessageSendMode sendMode = MessageSendMode.Reliable) {
+        public void SendPayload(string key, Message payload, MessageSendMode sendMode = MessageSendMode.Reliable) {
             Message payloadMessage = Message.Create(sendMode, Messages.EntityStateMessage);
             payloadMessage.Add(ViewId);
-            payloadMessage.Add(header);
+            payloadMessage.Add(key);
             payloadMessage.AddMessage(payload);
             Network.Send(payloadMessage);
         }
 
         [MessageHandler((ushort)Messages.EntityStateMessage)]
         internal static void EntityState_HandlerServer(ushort fromClientId, Message message) {
-            Network.Send(message, true);
+            var backup = message;
+            var view = Network.Spawned[backup.GetInt()];
+            if (view.Owner != fromClientId && Network.Client.Id != fromClientId) {
+                return;
+            }
+            Network.Send(message, fromClientId);
         }
 
         [MessageHandler((ushort)Messages.EntityStateMessage)]
         internal static void EntityState_HandlerClient(Message message) {
             var view = Network.Spawned[message.GetInt()];
-            //Message.Create().Add(message.bits, message.UnreadBits);
-            view.PayloadReceived.Invoke(message.GetString(), message);
+            int unreadBits = message.UnreadBits;
+            message.GetBits(unreadBits, out ulong bitfield);
+            var payloadMessage = Message.Create().AddBits(bitfield, unreadBits);
+            view.PayloadReceived.Invoke(message.GetString(), payloadMessage);
         }
 
         [ContextMenu("Destroy")]
@@ -55,10 +69,10 @@ namespace Beyond.Networking
             Network.Mono.Client.Send(rpcMessage);
         }
 
-        public void RPC(ObservableBehaviour observable, string methodName, ClientRef target, MessageSendMode reliability = MessageSendMode.Unreliable, params object[] args){
+        public void RPC(ObservableBehaviour observable, string methodName, ushort target, MessageSendMode reliability = MessageSendMode.Unreliable, params object[] args){
             var componentIndex = Observables.ToList().IndexOf(observable);
             Message rpcMessage = Message.Create(MessageSendMode.Reliable, Messages.RpcMessage);
-            rpcMessage.AddSerializable<RpcMessage>(new(true, ViewId, componentIndex, methodName, args, target.ActorNumber, false));
+            rpcMessage.AddSerializable<RpcMessage>(new(true, ViewId, componentIndex, methodName, args, target, false));
             Network.Send(rpcMessage);
         }
 
@@ -105,26 +119,39 @@ namespace Beyond.Networking
         }
 
         public void RequestOwnership(){
-        
+            if (Network.isHost)
+                TransferOwnership(Network.Client.Id);
+        }
+
+        [MessageHandler((ushort)Messages.ChangeOwnerMessage)]
+        internal static void TransferOwnership_Handler(ushort fromClientId, Message message) {
+            var backup = message;
+            var view = Network.Spawned[backup.GetInt()];
+            if (view.SharedOwnership)
+                Network.Send(message, true);
         }
 
         [MessageHandler((ushort)Messages.ChangeOwnerMessage)]
         internal static void TransferOwnership_Handler(Message message) {
-        
+            var view = Network.Spawned[message.GetInt()];
+            view.Owner = message.GetUShort();
         }
 
-        public void TransferOwnership(uint newActorNumber){
-            
+        public void TransferOwnership(int newActorNumber){
+            if (!Network.isHost)
+                return;
+            Message message = Message.Create(MessageSendMode.Reliable, Messages.ChangeOwnerMessage);
+            message.Add(ViewId).Add(newActorNumber);
+            Network.Send(message, true);
         }
 
         private void Awake() {
-            FindObservables();
-            
+            FindObservables();     
         }
 
         internal void Allocated() {
             if (SceneId > 0 && Network.isHost)
-                TransferOwnership(Network.LocalClient.ActorNumber);
+                TransferOwnership(Network.Client.Id);
         }
     }
 }

@@ -9,15 +9,21 @@ public class Jump : ObservableBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && NetworkView.IsMine) {
+        if (!NetworkView.IsMine) return;
+        if (Input.GetKeyDown(KeyCode.Z)) {
+            Debug.Log("Sending Jump RPC");
             RPC(nameof(JumpRPC), reliability: Riptide.MessageSendMode.Reliable);
         }
-        if (Input.GetKeyDown(KeyCode.X) && NetworkView.IsMine) {
+        if (Input.GetKeyDown(KeyCode.X)) {
+            Debug.Log("Requesting Ownership");
             NetworkView.RequestOwnership();
         }
     }
     public Rigidbody rb;
     public float jumpForce;
+
+    protected override string _payloadHeaderKey => "JUMP";
+
     public void JumpRPC() {
         rb.AddForce(Vector3.up * 5, ForceMode.Impulse);
     }

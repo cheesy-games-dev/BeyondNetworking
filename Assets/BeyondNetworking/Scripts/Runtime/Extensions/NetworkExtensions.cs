@@ -10,6 +10,10 @@ namespace Beyond.Networking
     {
         private static BinaryFormatter _binaryFormatter = new();
         private static MemoryStream _memoryStream = null;
+        public static NetworkView GetNetworkView(this Object a) {
+            if(a is Component) return (a as Component).GetNetworkView();
+            else return (a as GameObject).GetNetworkView();
+        }
         public static NetworkView GetNetworkView(this Component a) => a.GetComponentInParent<NetworkView>();
         public static NetworkView GetNetworkView(this GameObject a) => a.GetComponentInParent<NetworkView>();
         public static byte[] ToBytes(this object obj) {

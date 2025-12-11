@@ -20,6 +20,8 @@ namespace Beyond.Networking
             }
         }
         public static void Send(Message message, bool asServer = false) {
+            if (!Server.IsRunning && !Client.IsConnected)
+                return;
             if (asServer)
                 Mono.Server.SendToAll(message);
             else
