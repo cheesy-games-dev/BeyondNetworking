@@ -2,10 +2,12 @@ using Riptide;
 using Riptide.Utils;
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Beyond.Networking
 {
-    public class NetworkMono : MonoBehaviour
+    [DefaultExecutionOrder(-ushort.MaxValue)]
+    public class NetworkMono : ObservableBehaviour
     {
         public Server Server;
         public Client Client;
@@ -14,7 +16,9 @@ namespace Beyond.Networking
             DontDestroyOnLoad(this);
             Server = new();
             Client = new();
+            SceneManager.sceneLoaded += Network.OnSceneLoaded;
             RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, false);
+            Network.AllocateSceneViews();
         }
 
         private void LateUpdate() {

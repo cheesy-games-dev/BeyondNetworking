@@ -9,7 +9,7 @@ namespace Beyond.Networking
     [Serializable]
     public struct ClientRef : IMessageSerializable {
         public Connection GetConnection() {
-            if (!Network.Mono.Server.IsRunning) {
+            if (!Network.isHost) {
                 Debug.LogWarning("Can't get Connection, Server not running");
                 return null;
             }
@@ -21,7 +21,7 @@ namespace Beyond.Networking
             message.Add(ActorNumber);
             message.Add(IsHost);
             message.Add(CustomProperties);
-            if(NetworkSettings.Settings.PublishUserIds) message.Add(UserId);
+            if(Network.Settings.PublishUserIds) message.Add(UserId);
         }
 
         public void Deserialize(Message message) {
@@ -29,7 +29,7 @@ namespace Beyond.Networking
             ActorNumber = message.GetUInt();
             IsHost = message.GetBool();
             CustomProperties = message.GetStrings();
-            if (NetworkSettings.Settings.PublishUserIds)
+            if (Network.Settings.PublishUserIds)
                 UserId = message.GetString();
         }
 

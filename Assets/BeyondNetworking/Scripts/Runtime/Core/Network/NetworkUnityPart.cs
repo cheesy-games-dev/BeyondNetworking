@@ -1,5 +1,6 @@
 using Riptide;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,40 +8,68 @@ namespace Beyond.Networking
 {
     public static partial class Network
     {
-        public static Buffer Buffer = new();
-        public static void OnSceneLoaded(Scene arg0, LoadSceneMode arg1) {
-            List<NetworkView> views = new();
-            foreach (var gameObject in arg0.GetRootGameObjects()) {
-                views.AddRange(gameObject.GetComponentsInChildren<NetworkView>());
-            }
+        public static string CurrentScene;
+        public static Dictionary<KeyValuePair<int, string>, NetworkView> SpawnedFromInstantiate = new();
+        public static Dictionary<int, NetworkView> Spawned = new();
+        public static void AllocateSceneViews() {
             int sceneId = 0;
-            foreach (var view in views) {
+            foreach (var view in GameObject.FindObjectsByType<NetworkView>(FindObjectsSortMode.InstanceID)) {
                 view.SceneId = sceneId;
                 sceneId++;
                 AllocateView(view);
             }
         }
+        public static void Send(Message message, bool asServer = false) {
+            if (asServer)
+                Mono.Server.SendToAll(message);
+            else
+                Mono.Client.Send(message);
+        }
+        public static void Send(Message message, ushort exceptClient) {
+            Mono.Server.SendToAll(message, exceptClient);
+        }
+        public static void SendTo(Message message, ushort toClient) {
+            Mono.Server.Send(message, toClient);
+        }
+        internal static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+            Spawned.Clear();
+            SpawnedFromInstantiate.Clear();
+            CurrentScene = scene.name;
+            AllocateSceneViews();
+        }
         public static int AllocateView(NetworkView view) {
-            view.ViewId = Buffer.Spawned.Count;
-            Buffer.Spawned.Add(view.ViewId, view);
+            view.ViewId = Spawned.Count;
+            Spawned.Add(view.ViewId, view);
+            view.Allocated();
             return view.ViewId;
         }
         public static GameObject Instantiate(string key, Vector3 position = new(), Quaternion rotation = new()) {
-            if (!Mono.Server.IsRunning) {
-                Debug.LogWarning("Server not running, Cannot instantiate");
-                return null;
-            }
-            var id = Buffer.SpawnedFromInstantiate.Count;
+            var id = SpawnedFromInstantiate.Count;
             Message spawnMessage = Message.Create(MessageSendMode.Reliable, Messages.ObjectSpawnMessage);
             spawnMessage.Add(key).Add(id).Add(position).Add(rotation);
-            Mono.Server.SendToAll(spawnMessage);
-            return InstantiatePrefab(key, id, position, rotation);
+            Send(spawnMessage, true);
+            while (Spawned[id] == null);
+            return Spawned[id].gameObject;
         }
 
+        public static void Destroy(GameObject gameObject) {
+            Destroy(gameObject.GetNetworkView());
+        }
+        public static void Destroy(NetworkView networkView) {
+            if (!isHost) {
+                Debug.LogWarning("Server not running, Cannot instantiate");
+                return;
+            }
+            var message = Message.Create(MessageSendMode.Reliable, Messages.ObjectDestroyMessage);
+            message.Add(networkView.ViewId);
+            Send(message, true);
+        }
+        [MessageHandler((ushort)Messages.ObjectDestroyMessage)]
+        internal static void ObjectDestroy_Handler(Message message) {
+            Destroy(Spawned[message.GetInt()]);
+        }
         [MessageHandler((ushort)Messages.ObjectSpawnMessage)]
         internal static void ObjectSpawn_Handler(Message message) {
-            if (Mono.Server.IsRunning)
-                return;
             InstantiatePrefab(message.GetString(), message.GetInt(), message.GetVector3(), message.GetQuaternion());
         }
 
@@ -48,21 +77,9 @@ namespace Beyond.Networking
             var prefab = Prefabs[key];
             var gameObject = Object.Instantiate(prefab, position, rotation);
             gameObject.GetNetworkView().InstantiationId = id;
-            Buffer.SpawnedFromInstantiate.Add(new(id, key), gameObject.GetNetworkView());
+            SpawnedFromInstantiate.Add(new(id, key), gameObject.GetNetworkView());
             AllocateView(gameObject.GetNetworkView());
             return gameObject;
         }
     }
-
-  public class Buffer {
-        public string CurrentScene;
-        public Dictionary<KeyValuePair<int, string>, NetworkView> SpawnedFromInstantiate = new();
-        public Dictionary<int, NetworkView> Spawned = new();
-
-        public Buffer() {
-            CurrentScene = SceneManager.GetActiveScene().name;
-            SpawnedFromInstantiate = new();
-            Spawned = new();
-        }
-  }
 }

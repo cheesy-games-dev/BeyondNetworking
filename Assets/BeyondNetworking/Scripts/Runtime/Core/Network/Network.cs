@@ -5,7 +5,14 @@ using UnityEngine.SceneManagement;
 namespace Beyond.Networking {
     public static partial class Network
     {
-        public static NetworkMono Mono;
+        public static NetworkMono Mono {
+            get; internal set;
+        }
+        public static NetworkSettings Settings {
+            get; internal set;
+        }
+        public static bool isHost => Mono.Server.IsRunning;
+        public static bool isConnected => Mono.Client.IsConnected;
         public static Dictionary<string, GameObject> Prefabs = new();
         static Network() {
             StartNetwork();
@@ -21,7 +28,6 @@ namespace Beyond.Networking {
             UserId = Application.buildGUID;
             Mono = new GameObject("Beyond Mono").AddComponent<NetworkMono>();
             Mono.Server.ClientDisconnected += Server_ClientDisconnected;
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private static void Server_ClientDisconnected(object sender, Riptide.ServerDisconnectedEventArgs e) {

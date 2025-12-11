@@ -9,7 +9,6 @@ namespace Beyond.Networking
     [CreateAssetMenu(fileName = SETTINGSPATH, menuName ="Beyond/Networking/Settings")]
     public class NetworkSettings : ScriptableObject
     {
-        public static NetworkSettings Settings;
         [Header("Default Settings")]
         public int MaxMessagePayloadSize = ushort.MaxValue;
         public bool PublishUserIds = false;
@@ -24,7 +23,7 @@ namespace Beyond.Networking
         public const string SETTINGSPATH = "Network Settings";
 
         public void Start() {
-            Settings = this;
+            Network.Settings = this;
             this.name = SETTINGSPATH;
             Message.MaxPayloadSize = MaxMessagePayloadSize;
             Network.Prefabs.Clear();

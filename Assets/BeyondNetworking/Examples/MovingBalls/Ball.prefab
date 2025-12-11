@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6714131840720070932}
   - component: {fileID: 2866445588843608532}
   - component: {fileID: 5009079421657090140}
+  - component: {fileID: 6672262423498609803}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 7128690482096088350}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -105,6 +106,19 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6672262423498609803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3309115302252242505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc04b74dec699c845b575bedfec1de14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rb: {fileID: 2832151671868483414}
 --- !u!1 &5319911287248938347
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,4 +193,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SharedOwnership: 0
-  SceneId: 0
+  AutoFindObservables: 0
+  Observables: []

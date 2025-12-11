@@ -13,6 +13,7 @@ namespace Beyond.Networking
             if (name == "SERVER")
                 name += Guid.NewGuid().GetHashCode().ToString();
             Mono.Server.Start(listenPort, connections);
+            Connect("127.0.0.1", listenPort);
             CurrentServer = new ServerData(name, connections, properties);
         }
         public static ClientRef LocalClient;
@@ -45,7 +46,7 @@ namespace Beyond.Networking
 
         [MessageHandler((ushort)Messages.ServerDataMessage)]
         internal static void ServerDataUpdatedHandler(Message message) {
-            if (Mono.Server.IsRunning)
+            if (isHost)
                 return;
             CurrentServer = message.GetSerializable<ServerData>();
         }

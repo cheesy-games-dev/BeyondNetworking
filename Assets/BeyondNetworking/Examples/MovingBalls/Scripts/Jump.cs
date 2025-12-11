@@ -1,30 +1,24 @@
 using Beyond.Networking;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Jump : MonoBehaviour, IObservable
+public class Jump : ObservableBehaviour
 {
-    public void Deserialize() {
-        throw new System.NotImplementedException();
-    }
-
-    public void Serialize() {
-        throw new System.NotImplementedException();
-    }
-
     void Start() {
         rb = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            this.GetNetworkView().RPC(this, );
+        if (Input.GetKeyDown(KeyCode.Z) && NetworkView.IsMine) {
+            RPC(nameof(JumpRPC), reliability: Riptide.MessageSendMode.Reliable);
+        }
+        if (Input.GetKeyDown(KeyCode.X) && NetworkView.IsMine) {
+            NetworkView.RequestOwnership();
         }
     }
     public Rigidbody rb;
+    public float jumpForce;
     public void JumpRPC() {
-        rb.AddForce(Vector3.up * 50, ForceMode.Impulse);
+        rb.AddForce(Vector3.up * 5, ForceMode.Impulse);
     }
 }
