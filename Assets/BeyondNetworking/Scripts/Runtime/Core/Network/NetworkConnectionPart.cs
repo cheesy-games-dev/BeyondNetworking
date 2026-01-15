@@ -32,12 +32,12 @@ namespace Beyond.Networking
         }
 
         public static void UpdateServerData() {
-            var message = Message.Create(MessageSendMode.Reliable, Messages.ServerDataMessage);
+            var message = Message.Create(MessageSendMode.Reliable, MessageIds.ServerDataMessage);
             message.AddSerializable(CurrentServer);
             Mono.Server.SendToAll(message);
         }
 
-        [MessageHandler((ushort)Messages.ServerDataMessage)]
+        [MessageHandler((ushort)MessageIds.ServerDataMessage)]
         internal static void ServerDataUpdatedHandler(Message message) {
             if (isHost)
                 return;

@@ -14,7 +14,7 @@ namespace Beyond.Networking
         }
         protected string _payloadEndKey => !clientAuthority && Network.isHost ? "SERVER" : "OWNER";
         public bool canWrite => (NetworkView.IsMine && clientAuthority) || (!clientAuthority && Network.isHost);
-        public void RPC(string methodName, RpcTarget target = RpcTarget.All, bool buffered = false, MessageSendMode reliability = MessageSendMode.Unreliable, params object[] args) {
+        public void RPC(string methodName, NetworkTarget target = NetworkTarget.All, bool buffered = false, MessageSendMode reliability = MessageSendMode.Unreliable, params object[] args) {
             NetworkView.RPC(this, methodName, target, buffered, reliability, args);
         }
 

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Beyond.Networking
 {
-    public enum RpcTarget : uint {
+    public enum NetworkTarget : uint {
         All,
         Others,
         Server

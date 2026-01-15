@@ -47,7 +47,7 @@ namespace Beyond.Networking
         }
         public static GameObject Instantiate(string key, Vector3 position = new(), Quaternion rotation = new()) {
             var id = SpawnedFromInstantiate.Count;
-            Message spawnMessage = Message.Create(MessageSendMode.Reliable, Messages.ObjectSpawnMessage);
+            Message spawnMessage = Message.Create(MessageSendMode.Reliable, MessageIds.ObjectSpawnMessage);
             spawnMessage.Add(key).Add(id).Add(position).Add(rotation);
             Send(spawnMessage, true);
             while (Spawned[id] == null);
@@ -62,15 +62,15 @@ namespace Beyond.Networking
                 Debug.LogWarning("Server not running, Cannot instantiate");
                 return;
             }
-            var message = Message.Create(MessageSendMode.Reliable, Messages.ObjectDestroyMessage);
+            var message = Message.Create(MessageSendMode.Reliable, MessageIds.ObjectDestroyMessage);
             message.Add(networkView.ViewId);
             Send(message, true);
         }
-        [MessageHandler((ushort)Messages.ObjectDestroyMessage)]
+        [MessageHandler((ushort)MessageIds.ObjectDestroyMessage)]
         internal static void ObjectDestroy_Handler(Message message) {
             Destroy(Spawned[message.GetInt()]);
         }
-        [MessageHandler((ushort)Messages.ObjectSpawnMessage)]
+        [MessageHandler((ushort)MessageIds.ObjectSpawnMessage)]
         internal static void ObjectSpawn_Handler(Message message) {
             InstantiatePrefab(message.GetString(), message.GetInt(), message.GetVector3(), message.GetQuaternion());
         }
